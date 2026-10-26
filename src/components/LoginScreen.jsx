@@ -58,8 +58,7 @@ export default function LoginScreen({ onLogin }) {
         </form>
       ) : (
         <>
-          <p className="login-prompt">Sign in as</p>
-          <p className="login-mode-note">Local preview: orders are stored in this browser only.</p>
+          <p className="login-prompt">Select profile</p>
           <div className="login-buttons">
             {TEAM_MEMBERS.map((name) => (
               <button

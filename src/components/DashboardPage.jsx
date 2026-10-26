@@ -258,10 +258,7 @@ export default function DashboardPage({ refreshKey }) {
       <div className="chart-card">
         <h3>🗄️ Data Management</h3>
         <p style={{ fontSize: '0.8rem', color: '#6B7280', marginBottom: '0.75rem' }}>
-          {cloudDatabaseEnabled
-            ? 'Orders are saved to the shared online database.'
-            : 'Orders are saved only in this browser until a Supabase project is connected.'}
-          {' '}Use the Orders tab to edit an order. Export CSV for spreadsheets, or download JSON to edit or restore the full database.
+          Orders are stored permanently in the database until manually deleted. Export CSV for spreadsheets or download JSON backups to preserve your sales history.
         </p>
         <input
           ref={fileInputRef}
