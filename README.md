@@ -1,31 +1,59 @@
-# The 69 Store
+# 🍔 The 69 Store — Food Stall Order Manager
 
-Order manager for The 69 Store. The app supports local browser storage for setup and a shared Supabase database for use across devices.
+A mobile-first order management and sales analytics application designed for **The 69 Store** food stall team: **Pramit**, **Sohana**, and **Sumedh**.
 
-## Shared online setup
+🌐 **Live Application:** [https://pramitghosh02.github.io/The-69-store/](https://pramitghosh02.github.io/The-69-store/)
 
-1. Create a Supabase project and run [`supabase/schema.sql`](supabase/schema.sql) in the Supabase SQL Editor.
-2. In Supabase Auth settings, turn off public sign-ups. Create one email/password user for each team member and set the user's metadata field `member_name` to exactly `Pramit`, `Sohana`, or `Sumedh`.
-3. Copy `.env.example` to `.env` for local use. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` from the project's API settings. Use the publishable key (or the older anon key); never put a secret/service-role key in this app.
-4. Publish with a static host. Netlify is configured in [`netlify.toml`](netlify.toml); set those two environment variables in the Netlify site settings before its production build.
+---
 
-When Supabase is configured, staff sign in with their Supabase email and password. Order records are shared through the protected `orders` table. Without those settings, the app uses the current browser's local storage and orders will not sync to other devices.
+## ✨ Features
 
-To move orders already saved in a browser into Supabase, download a JSON backup from Dashboard → Data Management before switching to the cloud build. Sign in to the cloud build and choose **Merge JSON Backup** to add them to the shared database.
+- **Profile Login**: Sign in as Pramit, Sohana, or Sumedh with one tap.
+- **Zomato-Style Sticky Cart**: Floating bottom bar shows item count and total; tap to expand the full drawer or place orders in 1 second.
+- **Variant-Based Ordering**: Select sandwiches with or without cheese, coffee with or without ice cream, and fries with salted or peri peri flavour, each with independent pricing and quantities.
+- **Sequential Order IDs**: Orders are numbered cleanly as `#1`, `#2`, `#3...` with a persistent sequence counter.
+- **Status Workflow**: New orders default to `⏳ Pending`; tap once to switch to `✓ Completed`.
+- **Order Editing & Permanent Deletion**: Edit any past order or delete mistakes permanently with immediate `-1` database count synchronization.
+- **Analytics Dashboard**: Real-time sales metrics including Total Orders, Revenue, Items Sold, Unique Customers, Popular Items bar chart, and per-teammate performance breakdown with date filtering.
+- **Data Export & Backup**: Export orders to CSV for spreadsheets or download/restore complete JSON backups.
+- **Continuous Deployment**: Automated GitHub Actions workflow builds and publishes every push to GitHub Pages.
 
-## Order database tools
+---
 
-The Orders tab edits each full order, including item quantities and option choices. Dashboard → Data Management can export a CSV for reporting, download the full JSON backup, merge a backup, or replace the database from a backup. JSON backups preserve the order IDs, options, timestamps, statuses, and totals.
+## 📋 Menu & Pricing
 
-## Development
+| Category | Item | Price |
+|---|---|---|
+| **Rolls** | Egg Roll | ₹49 |
+| | Double Egg Roll | ₹59 |
+| | Egg Chicken Roll | ₹69 |
+| **Cutlets** | Veg Cutlets (3 pcs) | ₹49 |
+| | Paneer Cutlets (3 pcs) | ₹59 |
+| | Chicken Cutlets (3 pcs) | ₹69 |
+| **Samosa** | Plain Samosa (1 pc) | ₹25 |
+| | 1 Plate Samosa (2 pcs) | ₹48 |
+| | Dahi Samosa Chat (2 pcs) | ₹50 |
+| **Sandwiches** | Veg Sandwich | ₹39 *(Without Cheese)* / ₹49 *(With Cheese)* |
+| | Paneer Sandwich | ₹59 *(Without Cheese)* / ₹69 *(With Cheese)* |
+| | Chicken Sandwich | ₹59 *(Without Cheese)* / ₹69 *(With Cheese)* |
+| **Kebabs** | Chicken Tikka Kebabs (3 pcs) | ₹69 |
+| **Cold Coffee** | Classic Cold Coffee | ₹49 *(Optional Ice Cream Scoop)* |
+| **Lassi** | Chatpate Lassi | ₹39 |
+| | Rose Lassi | ₹39 |
+
+---
+
+## 🛠️ Development & Deployment
 
 ```sh
+# Install dependencies
 npm install
+
+# Run local development server
 npm run dev
-```
 
-For production, configure the two Supabase environment variables and run:
-
-```sh
+# Build for production
 npm run build
 ```
+
+Every push to the `main` branch automatically deploys to GitHub Pages via `.github/workflows/deploy.yml`.
