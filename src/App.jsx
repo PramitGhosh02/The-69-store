@@ -1,18 +1,15 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import LoginScreen from './components/LoginScreen';
 import Header from './components/Header';
 import BottomNav from './components/BottomNav';
 import NewOrderPage from './components/NewOrderPage';
 import OrdersPage from './components/OrdersPage';
 import DashboardPage from './components/DashboardPage';
-import { clearStoredSession, cloudDatabaseEnabled, getStoredSession } from './data/storage';
+import { subscribeToOrders } from './data/storage';
 import './index.css';
 
 function App() {
   const [user, setUser] = useState(() => {
-    if (cloudDatabaseEnabled) {
-      return getStoredSession()?.user?.user_metadata?.member_name || null;
-    }
     return localStorage.getItem('the69store_user') || null;
   });
   const [activeTab, setActiveTab] = useState('new-order');
@@ -20,15 +17,24 @@ function App() {
   const [toast, setToast] = useState(null);
   const [editingOrder, setEditingOrder] = useState(null);
 
-  function handleLogin(name, authSession = null) {
+  // Subscribe to live multi-device order updates
+  useEffect(() => {
+    const unsubscribe = subscribeToOrders(() => {
+      setRefreshKey((k) => k + 1);
+    });
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, []);
+
+  function handleLogin(name) {
     setUser(name);
-    if (!authSession) localStorage.setItem('the69store_user', name);
+    localStorage.setItem('the69store_user', name);
   }
 
   function handleLogout() {
     setUser(null);
     localStorage.removeItem('the69store_user');
-    clearStoredSession();
     setActiveTab('new-order');
     setEditingOrder(null);
   }
@@ -63,7 +69,6 @@ function App() {
   }, []);
 
   function handleTabChange(tab) {
-    // If leaving new-order while editing, warn
     if (activeTab === 'new-order' && editingOrder && tab !== 'new-order') {
       if (!window.confirm('Discard edit and switch tabs?')) return;
       setEditingOrder(null);
@@ -102,7 +107,10 @@ function App() {
         <div className="toast">
           <span>{toast.message}</span>
           {toast.order && (
-            <button className="toast-edit-btn" onClick={() => handleEditOrder(toast.order)}>
+            <button
+              className="toast-edit-btn"
+              onClick={() => handleEditOrder(toast.order)}
+            >
               ✏️ Edit this order
             </button>
           )}

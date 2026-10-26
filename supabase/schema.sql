@@ -1,18 +1,21 @@
+-- Create orders table
 create table if not exists public.orders (
   id text primary key,
   payload jsonb not null,
   created_at timestamptz not null default now()
 );
 
+-- Enable Row Level Security (RLS)
 alter table public.orders enable row level security;
 
-revoke all on table public.orders from anon;
-grant select, insert, update, delete on table public.orders to authenticated;
-
-drop policy if exists "Team members can manage orders" on public.orders;
-create policy "Team members can manage orders"
+-- Allow read, insert, update, and delete access using the project anon key (no staff passwords needed!)
+drop policy if exists "Allow public access with anon key" on public.orders;
+create policy "Allow public access with anon key"
   on public.orders
   for all
-  to authenticated
+  to anon, authenticated
   using (true)
   with check (true);
+
+-- Enable Realtime so all phones receive live order updates via WebSocket
+alter publication supabase_realtime add table public.orders;

@@ -8,6 +8,8 @@ import {
   clearAllOrders,
   importOrdersJSON,
   cloudDatabaseEnabled,
+  activeSupabaseUrl,
+  saveSupabaseConfig,
 } from '../data/storage';
 import { TEAM_MEMBERS } from '../data/menu';
 
@@ -17,6 +19,9 @@ export default function DashboardPage({ refreshKey }) {
   const [dateTo, setDateTo] = useState('');
   const fileInputRef = useRef(null);
   const [importMode, setImportMode] = useState('merge');
+  const [showCloudConfig, setShowCloudConfig] = useState(false);
+  const [supabaseUrlInput, setSupabaseUrlInput] = useState(activeSupabaseUrl || '');
+  const [supabaseKeyInput, setSupabaseKeyInput] = useState('');
 
   useEffect(() => {
     let active = true;
@@ -252,6 +257,126 @@ export default function DashboardPage({ refreshKey }) {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Cloud Sync & Multi-Device Settings */}
+      <div className="chart-card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+          <h3>🌐 Live Multi-Device Sync</h3>
+          <span
+            style={{
+              fontSize: '0.7rem',
+              fontWeight: 700,
+              padding: '0.2rem 0.6rem',
+              borderRadius: '12px',
+              backgroundColor: cloudDatabaseEnabled ? '#D1FAE5' : '#F3F4F6',
+              color: cloudDatabaseEnabled ? '#065F46' : '#6B7280',
+            }}
+          >
+            {cloudDatabaseEnabled ? '● Live Sync Active' : '○ Local Storage'}
+          </span>
+        </div>
+
+        <p style={{ fontSize: '0.8rem', color: '#6B7280', marginBottom: '0.75rem' }}>
+          {cloudDatabaseEnabled
+            ? 'Connected to Supabase! Orders sync across all phones in real-time without refreshing.'
+            : 'Currently in local mode. Connect a free Supabase project so Pramit, Sohana, and Sumedh can all see live orders on their own phones.'}
+        </p>
+
+        {cloudDatabaseEnabled ? (
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.75rem', color: '#065F46', fontWeight: 600 }}>
+              Connected: {activeSupabaseUrl}
+            </span>
+            <button
+              className="clear-filter-btn"
+              style={{ padding: '0.3rem 0.6rem', fontSize: '0.72rem' }}
+              onClick={() => {
+                if (window.confirm('Disconnect from Supabase? Orders will revert to local device storage.')) {
+                  saveSupabaseConfig('', '');
+                }
+              }}
+            >
+              Disconnect
+            </button>
+          </div>
+        ) : (
+          <div>
+            {!showCloudConfig ? (
+              <button
+                className="place-order-btn"
+                style={{ padding: '0.65rem 1rem', fontSize: '0.85rem', marginTop: '0.25rem' }}
+                onClick={() => setShowCloudConfig(true)}
+              >
+                ⚡ Connect Supabase for Live Sync
+              </button>
+            ) : (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!supabaseUrlInput.trim() || !supabaseKeyInput.trim()) {
+                    alert('Please enter both the Supabase URL and Anon Key.');
+                    return;
+                  }
+                  saveSupabaseConfig(supabaseUrlInput, supabaseKeyInput);
+                }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.5rem',
+                  marginTop: '0.5rem',
+                  padding: '0.75rem',
+                  backgroundColor: '#F9FAFB',
+                  borderRadius: '12px',
+                }}
+              >
+                <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--secondary)' }}>
+                  Supabase Project URL
+                </label>
+                <input
+                  type="url"
+                  className="customer-input"
+                  style={{ marginBottom: 0, padding: '0.5rem 0.75rem', fontSize: '0.8rem' }}
+                  placeholder="https://xyzcompany.supabase.co"
+                  value={supabaseUrlInput}
+                  onChange={(e) => setSupabaseUrlInput(e.target.value)}
+                  required
+                />
+
+                <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--secondary)', marginTop: '0.25rem' }}>
+                  Supabase Anon Key (Public)
+                </label>
+                <input
+                  type="password"
+                  className="customer-input"
+                  style={{ marginBottom: 0, padding: '0.5rem 0.75rem', fontSize: '0.8rem' }}
+                  placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..."
+                  value={supabaseKeyInput}
+                  onChange={(e) => setSupabaseKeyInput(e.target.value)}
+                  required
+                />
+
+                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                  <button
+                    type="submit"
+                    className="place-order-btn"
+                    style={{ margin: 0, padding: '0.6rem 1rem', fontSize: '0.85rem' }}
+                  >
+                    💾 Save & Connect
+                  </button>
+                  <button
+                    type="button"
+                    className="clear-filter-btn"
+                    style={{ padding: '0.6rem 1rem' }}
+                    onClick={() => setShowCloudConfig(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Data Management */}

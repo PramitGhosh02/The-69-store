@@ -1,86 +1,54 @@
+import { createClient } from '@supabase/supabase-js';
+
 const STORAGE_KEY = 'the69store_orders';
 const COUNTER_KEY = 'the69store_last_order_num';
-const SESSION_KEY = 'the69store_supabase_session';
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL?.replace(/\/$/, '');
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const SUPABASE_CONFIG_KEY = 'the69store_supabase_config';
 
-export const cloudDatabaseEnabled = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
+// 1. Check environment variables
+const ENV_SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL?.replace(/\/$/, '');
+const ENV_SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Request persistent storage from browser so orders stay saved permanently
-if (typeof navigator !== 'undefined' && navigator.storage?.persist) {
-  navigator.storage.persist().catch(() => {});
-}
-
-export function getStoredSession() {
+// 2. Also allow stored credentials (from in-app settings if configured)
+function getSavedSupabaseConfig() {
   try {
-    return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+    const raw = localStorage.getItem(SUPABASE_CONFIG_KEY);
+    return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
   }
 }
 
-export function clearStoredSession() {
-  localStorage.removeItem(SESSION_KEY);
-}
-
-async function getAccessToken() {
-  const session = getStoredSession();
-  if (!session?.access_token) throw new Error('Please sign in again to access the shared database.');
-
-  if (session.expires_at && session.expires_at * 1000 < Date.now() + 30000) {
-    if (!session.refresh_token) throw new Error('Your session expired. Please sign in again.');
-    const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
-      method: 'POST',
-      headers: { apikey: SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refresh_token: session.refresh_token }),
-    });
-    const refreshed = await response.json();
-    if (!response.ok) {
-      clearStoredSession();
-      throw new Error(refreshed.msg || refreshed.message || 'Your session expired. Please sign in again.');
-    }
-    const nextSession = { ...refreshed, expires_at: Math.floor(Date.now() / 1000) + refreshed.expires_in };
-    localStorage.setItem(SESSION_KEY, JSON.stringify(nextSession));
-    return nextSession.access_token;
+export function saveSupabaseConfig(url, key) {
+  if (!url || !key) {
+    localStorage.removeItem(SUPABASE_CONFIG_KEY);
+  } else {
+    localStorage.setItem(
+      SUPABASE_CONFIG_KEY,
+      JSON.stringify({ url: url.trim().replace(/\/$/, ''), key: key.trim() })
+    );
   }
-  return session.access_token;
+  window.location.reload();
 }
 
-export async function signIn(email, password) {
-  const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
-    method: 'POST',
-    headers: { apikey: SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
-  });
-  const result = await response.json();
-  if (!response.ok) {
-    throw new Error(result.msg || result.message || 'Unable to sign in. Check your email and password.');
-  }
-  const session = { ...result, expires_at: Math.floor(Date.now() / 1000) + result.expires_in };
-  localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-  return session;
+const savedConfig = getSavedSupabaseConfig();
+export const activeSupabaseUrl = ENV_SUPABASE_URL || savedConfig?.url || '';
+export const activeSupabaseKey = ENV_SUPABASE_ANON_KEY || savedConfig?.key || '';
+
+export const cloudDatabaseEnabled = Boolean(activeSupabaseUrl && activeSupabaseKey);
+
+// Initialize Supabase client if configured
+export const supabase = cloudDatabaseEnabled
+  ? createClient(activeSupabaseUrl, activeSupabaseKey, {
+      realtime: { params: { eventsPerSecond: 10 } },
+    })
+  : null;
+
+// Request persistent storage from browser so local copy never gets evicted
+if (typeof navigator !== 'undefined' && navigator.storage?.persist) {
+  navigator.storage.persist().catch(() => {});
 }
 
-async function cloudRequest(path, options = {}) {
-  const accessToken = await getAccessToken();
-  const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-    ...options,
-    headers: {
-      apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-  });
-  if (!response.ok) {
-    const result = await response.json().catch(() => ({}));
-    throw new Error(result.message || result.details || 'The shared database request failed. Please try again.');
-  }
-  if (response.status === 204) return null;
-  return response.json();
-}
-
-function loadLocalOrders() {
+export function loadLocalOrders() {
   try {
     const data = localStorage.getItem(STORAGE_KEY);
     return data ? JSON.parse(data) : [];
@@ -89,125 +57,175 @@ function loadLocalOrders() {
   }
 }
 
+export function saveLocalOrders(orders) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(orders));
+  } catch {}
+}
+
 export async function loadOrders() {
-  if (!cloudDatabaseEnabled) return loadLocalOrders();
-  const rows = await cloudRequest('orders?select=payload');
-  return rows.map((row) => row.payload).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  if (!cloudDatabaseEnabled || !supabase) {
+    return loadLocalOrders();
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('orders')
+      .select('payload')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    const cloudOrders = (data || []).map((row) => row.payload);
+    // Keep local storage synchronized as an offline cache
+    saveLocalOrders(cloudOrders);
+    return cloudOrders;
+  } catch (err) {
+    console.warn('Could not load from Supabase, using local orders:', err.message);
+    return loadLocalOrders();
+  }
 }
 
 export async function saveOrders(orders) {
-  if (!cloudDatabaseEnabled) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(orders));
-    return orders;
-  }
-  if (orders.length) {
-    await cloudRequest('orders?on_conflict=id', {
-      method: 'POST',
-      headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
-      body: JSON.stringify(orders.map((order) => ({ id: order.id, payload: order }))),
-    });
+  saveLocalOrders(orders);
+  if (cloudDatabaseEnabled && supabase && orders.length) {
+    try {
+      await supabase.from('orders').upsert(
+        orders.map((o) => ({ id: String(o.id), payload: o }))
+      );
+    } catch (err) {
+      console.warn('Supabase save error:', err);
+    }
   }
   return orders;
 }
 
 export async function addOrder(order) {
-  if (cloudDatabaseEnabled) {
-    await cloudRequest('orders?on_conflict=id', {
-      method: 'POST',
-      headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
-      body: JSON.stringify({ id: order.id, payload: order }),
-    });
-    return order;
+  // Save locally first
+  const local = loadLocalOrders();
+  local.unshift(order);
+  saveLocalOrders(local);
+
+  if (cloudDatabaseEnabled && supabase) {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .upsert({ id: String(order.id), payload: order });
+      if (error) console.warn('Supabase addOrder error:', error.message);
+    } catch (err) {
+      console.warn('Supabase addOrder failed:', err);
+    }
   }
-  const orders = loadLocalOrders();
-  orders.unshift(order);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(orders));
   return order;
 }
 
-export async function updateOrder(orderId, updatedOrder) {
-  if (cloudDatabaseEnabled) {
-    const orders = await loadOrders();
-    const order = orders.find((item) => String(item.id) === String(orderId));
-    if (!order) return orders;
-    const nextOrder = { ...order, ...updatedOrder, updatedAt: new Date().toISOString() };
-    await cloudRequest(`orders?id=eq.${encodeURIComponent(String(orderId))}`, {
-      method: 'PATCH',
-      headers: { Prefer: 'return=minimal' },
-      body: JSON.stringify({ payload: nextOrder }),
-    });
-    return loadOrders();
-  }
-  const orders = loadLocalOrders();
-  const idx = orders.findIndex((o) => String(o.id) === String(orderId));
+export async function updateOrder(orderId, updatedFields) {
+  const local = loadLocalOrders();
+  const idx = local.findIndex((o) => String(o.id) === String(orderId));
+  let updatedOrder = null;
+
   if (idx !== -1) {
-    orders[idx] = { ...orders[idx], ...updatedOrder, updatedAt: new Date().toISOString() };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(orders));
+    local[idx] = {
+      ...local[idx],
+      ...updatedFields,
+      updatedAt: new Date().toISOString(),
+    };
+    updatedOrder = local[idx];
+    saveLocalOrders(local);
   }
-  return orders;
+
+  if (cloudDatabaseEnabled && supabase && updatedOrder) {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ payload: updatedOrder })
+        .eq('id', String(orderId));
+      if (error) console.warn('Supabase updateOrder error:', error.message);
+    } catch (err) {
+      console.warn('Supabase updateOrder failed:', err);
+    }
+  }
+  return local;
 }
 
 export async function deleteOrder(orderId) {
-  if (cloudDatabaseEnabled) {
-    await cloudRequest(`orders?id=eq.${encodeURIComponent(String(orderId))}`, { method: 'DELETE' });
-    return loadOrders();
-  }
-  const orders = loadLocalOrders().filter((o) => String(o.id) !== String(orderId));
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(orders));
+  const local = loadLocalOrders().filter((o) => String(o.id) !== String(orderId));
+  saveLocalOrders(local);
 
-  // Recalculate highest order ID so the order sequence counter stays aligned with remaining orders
+  // Realign local sequence counter
   let maxId = 0;
-  for (const o of orders) {
+  for (const o of local) {
     const val = parseInt(o.id, 10);
     if (!isNaN(val) && val > maxId) {
       maxId = val;
     }
   }
-  localStorage.setItem(COUNTER_KEY, String(maxId));
+  try {
+    localStorage.setItem(COUNTER_KEY, String(maxId));
+  } catch {}
 
-  return orders;
+  if (cloudDatabaseEnabled && supabase) {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .delete()
+        .eq('id', String(orderId));
+      if (error) console.warn('Supabase deleteOrder error:', error.message);
+    } catch (err) {
+      console.warn('Supabase deleteOrder failed:', err);
+    }
+  }
+
+  return local;
 }
 
 export async function clearAllOrders() {
-  if (cloudDatabaseEnabled) {
-    await cloudRequest('orders?id=not.is.null', { method: 'DELETE' });
-    return [];
+  saveLocalOrders([]);
+  try {
+    localStorage.setItem(COUNTER_KEY, '0');
+  } catch {}
+
+  if (cloudDatabaseEnabled && supabase) {
+    try {
+      await supabase.from('orders').delete().neq('id', '___non_existent___');
+    } catch (err) {
+      console.warn('Supabase clearAllOrders error:', err);
+    }
   }
-  localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
-  localStorage.setItem(COUNTER_KEY, '0');
   return [];
 }
 
-export async function importOrdersJSON(jsonString, mode = 'merge') {
-  let parsed;
-  try {
-    parsed = JSON.parse(jsonString);
-  } catch {
-    throw new Error('This file is not valid JSON.');
-  }
-  const imported = Array.isArray(parsed) ? parsed : parsed?.orders;
-  if (!Array.isArray(imported) || imported.some((order) => (
-    !order || (typeof order.id !== 'string' && typeof order.id !== 'number') || !String(order.id).trim() ||
-    typeof order.createdAt !== 'string' || !Array.isArray(order.items) ||
-    !order.items.every((item) => item && typeof item.name === 'string' && Number.isFinite(item.qty) && item.qty > 0)
-  ))) {
-    throw new Error('The backup must contain orders with an ID, date, and valid items.');
-  }
-  if (new Set(imported.map((order) => String(order.id))).size !== imported.length) {
-    throw new Error('The backup contains duplicate order IDs.');
+/** Subscribe to live real-time updates across all connected devices */
+export function subscribeToOrders(onUpdate) {
+  if (cloudDatabaseEnabled && supabase) {
+    const channel = supabase
+      .channel('realtime:orders')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'orders' },
+        async (change) => {
+          console.log('Realtime change received from Supabase:', change);
+          const fresh = await loadOrders();
+          onUpdate(fresh);
+        }
+      )
+      .subscribe((status) => {
+        console.log('Supabase Realtime status:', status);
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }
 
-  let result = imported;
-  if (mode === 'merge') {
-    const current = await loadOrders();
-    const merged = new Map(current.map((order) => [String(order.id), order]));
-    imported.forEach((order) => merged.set(String(order.id), order));
-    result = [...merged.values()].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  } else if (cloudDatabaseEnabled) {
-    await clearAllOrders();
-  }
-  await saveOrders(result);
-  return result;
+  // Cross-tab fallback for same browser
+  const handleStorage = (e) => {
+    if (e.key === STORAGE_KEY) {
+      onUpdate(loadLocalOrders());
+    }
+  };
+  window.addEventListener('storage', handleStorage);
+  return () => window.removeEventListener('storage', handleStorage);
 }
 
 export function generateOrderId() {
@@ -236,13 +254,30 @@ export function generateOrderId() {
 export function exportOrdersCSV(orders) {
   if (orders.length === 0) return null;
 
-  const header = ['Order ID', 'Date', 'Time', 'Created By', 'Customer', 'Item', 'Option', 'Qty', 'Unit Price', 'Line Total', 'Order Total', 'Status'];
+  const header = [
+    'Order ID',
+    'Date',
+    'Time',
+    'Created By',
+    'Customer',
+    'Item',
+    'Option',
+    'Qty',
+    'Unit Price',
+    'Line Total',
+    'Order Total',
+    'Status',
+  ];
   const rows = [];
 
   orders.forEach((order) => {
     const d = new Date(order.createdAt);
     const date = d.toLocaleDateString('en-IN');
-    const time = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+    const time = d.toLocaleTimeString('en-IN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    });
 
     order.items.forEach((item) => {
       rows.push([
@@ -262,15 +297,22 @@ export function exportOrdersCSV(orders) {
     });
   });
 
-  const csvContent = [header, ...rows]
+  return [header, ...rows]
     .map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(','))
     .join('\n');
-
-  return csvContent;
 }
 
 export function exportOrdersJSON(orders) {
-  return JSON.stringify({ format: 'the69store-orders', version: 1, exportedAt: new Date().toISOString(), orders }, null, 2);
+  return JSON.stringify(
+    {
+      format: 'the69store-orders',
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      orders,
+    },
+    null,
+    2
+  );
 }
 
 export function downloadCSV(csvString, filename) {
@@ -291,4 +333,49 @@ export function downloadJSON(jsonString, filename) {
   a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+export async function importOrdersJSON(jsonString, mode = 'merge') {
+  let parsed;
+  try {
+    parsed = JSON.parse(jsonString);
+  } catch {
+    throw new Error('This file is not valid JSON.');
+  }
+  const imported = Array.isArray(parsed) ? parsed : parsed?.orders;
+  if (
+    !Array.isArray(imported) ||
+    imported.some(
+      (order) =>
+        !order ||
+        (typeof order.id !== 'string' && typeof order.id !== 'number') ||
+        !String(order.id).trim() ||
+        typeof order.createdAt !== 'string' ||
+        !Array.isArray(order.items) ||
+        !order.items.every(
+          (item) =>
+            item &&
+            typeof item.name === 'string' &&
+            Number.isFinite(item.qty) &&
+            item.qty > 0
+        )
+    )
+  ) {
+    throw new Error('The backup must contain orders with an ID, date, and valid items.');
+  }
+
+  let result = imported;
+  if (mode === 'merge') {
+    const current = await loadOrders();
+    const merged = new Map(current.map((order) => [String(order.id), order]));
+    imported.forEach((order) => merged.set(String(order.id), order));
+    result = [...merged.values()].sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+  } else {
+    await clearAllOrders();
+  }
+
+  await saveOrders(result);
+  return result;
 }
