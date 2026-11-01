@@ -43,7 +43,11 @@ export default function OrdersPage({ refreshKey, onEditOrder, onOrderDeleted }) 
   });
 
   async function handleDelete(id) {
-    if (window.confirm(`Delete Order #${id} permanently?`)) {
+    if (
+      window.confirm(
+        `Delete Order #${id}? Subsequent orders will automatically shift and renumber (e.g. Order #3 becomes #2).`
+      )
+    ) {
       try {
         const updated = await deleteOrder(id);
         setOrders(updated);

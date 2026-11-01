@@ -38,7 +38,7 @@ function resolvePrice(menuItem, optionName) {
   return menuItem.price || 0;
 }
 
-const QUICK_NOTE_CHIPS = ['Extra Spicy 🔥', 'No Onion 🧅', 'Parcel 🛍️', 'Less Ice 🧊'];
+const QUICK_NOTE_CHIPS = ['Extra Spicy 🔥', 'Parcel 🛍️'];
 
 export default function NewOrderPage({ user, onOrderPlaced, editingOrder, onCancelEdit }) {
   const [cart, setCart] = useState({});

@@ -214,34 +214,63 @@ export async function updateOrder(orderId, updatedFields) {
 }
 
 export async function deleteOrder(orderId) {
-  const local = loadLocalOrders().filter((o) => String(o.id) !== String(orderId));
-  saveLocalOrders(local);
+  const currentOrders = loadLocalOrders();
+  const oldIds = new Set(currentOrders.map((o) => String(o.id)));
 
-  // Realign local sequence counter
-  let maxId = 0;
-  for (const o of local) {
-    const val = parseInt(o.id, 10);
-    if (!isNaN(val) && val > maxId) {
-      maxId = val;
-    }
-  }
+  // 1. Filter out the deleted order
+  const remaining = currentOrders.filter((o) => String(o.id) !== String(orderId));
+
+  // 2. Sort chronologically (oldest first) to assign sequential IDs: 1, 2, 3...
+  const sortedChronological = [...remaining].sort(
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  );
+
+  // 3. Renumber remaining orders sequentially (e.g. order 3 becomes 2, order 4 becomes 3)
+  const renumberedChronological = sortedChronological.map((order, index) => {
+    const newId = String(index + 1);
+    return {
+      ...order,
+      id: newId,
+    };
+  });
+
+  // 4. Store in reverse chronological order (newest first) for UI display
+  const renumberedOrders = [...renumberedChronological].reverse();
+  saveLocalOrders(renumberedOrders);
+
+  // 5. Update local sequence counter to match the new highest order ID
+  const newMaxId = renumberedOrders.length;
   try {
-    localStorage.setItem(COUNTER_KEY, String(maxId));
+    localStorage.setItem(COUNTER_KEY, String(newMaxId));
   } catch {}
 
+  // 6. Sync with Supabase if cloud database is enabled
   if (cloudDatabaseEnabled && supabase) {
     try {
-      const { error } = await supabase
-        .from('orders')
-        .delete()
-        .eq('id', String(orderId));
-      if (error) console.warn('Supabase deleteOrder error:', error.message);
+      const newIds = new Set(renumberedOrders.map((o) => String(o.id)));
+      // Find IDs that previously existed in the database but are no longer used
+      const orphanedIds = [...oldIds].filter((id) => !newIds.has(id));
+
+      if (orphanedIds.length > 0) {
+        const { error: delErr } = await supabase
+          .from('orders')
+          .delete()
+          .in('id', orphanedIds);
+        if (delErr) console.warn('Supabase delete orphaned error:', delErr.message);
+      }
+
+      if (renumberedOrders.length > 0) {
+        const { error: upsertErr } = await supabase.from('orders').upsert(
+          renumberedOrders.map((o) => ({ id: String(o.id), payload: o }))
+        );
+        if (upsertErr) console.warn('Supabase upsert renumbered error:', upsertErr.message);
+      }
     } catch (err) {
-      console.warn('Supabase deleteOrder failed:', err);
+      console.warn('Supabase deleteOrder and renumber failed:', err);
     }
   }
 
-  return local;
+  return renumberedOrders;
 }
 
 export async function clearAllOrders() {

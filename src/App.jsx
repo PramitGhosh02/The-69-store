@@ -64,8 +64,8 @@ function App() {
 
   const handleOrderDeleted = useCallback((orderId) => {
     setRefreshKey((k) => k + 1);
-    setToast({ message: `🗑️ Order #${orderId} deleted permanently.` });
-    setTimeout(() => setToast(null), 3000);
+    setToast({ message: `🗑️ Order #${orderId} deleted. Remaining orders renumbered.` });
+    setTimeout(() => setToast(null), 3500);
   }, []);
 
   function handleTabChange(tab) {
