@@ -1354,3 +1354,764 @@ body {
   color: var(--primary);
   font-size: 1.25rem;
 }
+
+/* ==========================================================================
+   FEATURE 1: Out of Stock & Stock Manager
+   ========================================================================== */
+
+.top-order-controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.top-order-controls .customer-input {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.stock-trigger-btn {
+  padding: 0.85rem 0.9rem;
+  background: #FFFFFF;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font: 600 0.82rem 'Poppins', sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.stock-trigger-btn:hover {
+  border-color: var(--primary);
+  background: #FFF7ED;
+}
+
+.stock-trigger-btn.has-oos {
+  border-color: #EF4444;
+  background: #FEF2F2;
+  color: #DC2626;
+  font-weight: 700;
+}
+
+/* Out of Stock Card Styles */
+.menu-card.out-of-stock-card {
+  opacity: 0.75;
+  background: #FAFAFA;
+  border-color: #FCA5A5;
+}
+
+.oos-badge {
+  display: inline-block;
+  background: #FEE2E2;
+  color: #B91C1C;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
+  margin-left: 0.4rem;
+  vertical-align: middle;
+}
+
+.oos-action-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+}
+
+.oos-label {
+  font-size: 0.72rem;
+  color: #DC2626;
+  font-weight: 700;
+}
+
+.restock-mini-btn {
+  padding: 0.2rem 0.5rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  border-radius: 6px;
+  background: #F3F4F6;
+  color: #374151;
+  border: 1px solid #D1D5DB;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.restock-mini-btn:hover {
+  background: #10B981;
+  color: #FFFFFF;
+  border-color: #059669;
+}
+
+.oos-variant-notice {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  background: #FEE2E2;
+  border-radius: 8px;
+  color: #991B1B;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Stock Manager Modal */
+.stock-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  z-index: 1100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.stock-modal-card {
+  width: 100%;
+  max-width: 480px;
+  max-height: 85vh;
+  background: #FFFFFF;
+  border-radius: 24px 24px 0 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2);
+  animation: slideUpModal 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+@keyframes slideUpModal {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.stock-modal-header {
+  padding: 1.25rem 1.25rem 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid var(--border);
+}
+
+.stock-modal-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--secondary);
+}
+
+.stock-modal-subtitle {
+  font-size: 0.78rem;
+  color: var(--text-light);
+  display: block;
+  margin-top: 0.15rem;
+}
+
+.stock-modal-close {
+  background: #F3F4F6;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #4B5563;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stock-modal-search {
+  padding: 0.75rem 1.25rem;
+  position: relative;
+}
+
+.stock-search-input {
+  width: 100%;
+  padding: 0.65rem 2rem 0.65rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font: inherit;
+  font-size: 0.82rem;
+  background: #F9FAFB;
+}
+
+.stock-search-input:focus {
+  outline: 2px solid var(--primary);
+  background: #FFFFFF;
+}
+
+.stock-search-clear {
+  position: absolute;
+  right: 1.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #9CA3AF;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.stock-modal-actions {
+  padding: 0 1.25rem 0.5rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.stock-reset-all-btn {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #065F46;
+  background: #D1FAE5;
+  border: 1px solid #A7F3D0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.stock-modal-body {
+  padding: 0 1.25rem 1rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.stock-group-section {
+  margin-bottom: 1rem;
+}
+
+.stock-group-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--primary);
+  letter-spacing: 1px;
+  margin-bottom: 0.4rem;
+  padding-bottom: 0.2rem;
+  border-bottom: 1px dashed var(--border);
+}
+
+.stock-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.stock-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.65rem 0.75rem;
+  background: #F9FAFB;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.stock-item-row.is-out {
+  background: #FEF2F2;
+  border-color: #FCA5A5;
+}
+
+.stock-item-info {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.stock-item-emoji {
+  font-size: 1.25rem;
+}
+
+.stock-item-name {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.stock-item-desc {
+  font-size: 0.72rem;
+  color: var(--text-light);
+}
+
+.stock-item-tag {
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  margin-left: 0.35rem;
+}
+
+.stock-toggle-pill {
+  padding: 0.4rem 0.75rem;
+  border-radius: 20px;
+  font: 700 0.72rem 'Poppins', sans-serif;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+}
+
+.stock-toggle-pill.pill-in {
+  background: #D1FAE5;
+  color: #065F46;
+  border-color: #10B981;
+}
+
+.stock-toggle-pill.pill-out {
+  background: #FEE2E2;
+  color: #991B1B;
+  border-color: #EF4444;
+}
+
+.stock-modal-footer {
+  padding: 0.75rem 1.25rem;
+  border-top: 1px solid var(--border);
+  background: #FFFFFF;
+}
+
+.stock-done-btn {
+  width: 100%;
+  padding: 0.85rem;
+  border: none;
+  border-radius: 12px;
+  background: var(--secondary);
+  color: #FFFFFF;
+  font: 700 0.92rem 'Poppins', sans-serif;
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   FEATURE 2: Cash vs UPI Payment Selection & Finances
+   ========================================================================== */
+
+.payment-method-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.payment-card-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.payment-toggle-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.payment-toggle-btn {
+  padding: 0.75rem 0.5rem;
+  border-radius: 10px;
+  border: 2px solid var(--border);
+  background: #F9FAFB;
+  color: var(--text-light);
+  font: 700 0.88rem 'Poppins', sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transition: all 0.15s ease;
+}
+
+.payment-toggle-btn.active-cash {
+  background: #ECFDF5;
+  border-color: #10B981;
+  color: #065F46;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.payment-toggle-btn.active-upi {
+  background: #EEF2FF;
+  border-color: #6366F1;
+  color: #4338CA;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+.summary-payment-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.4rem 0;
+  font-size: 0.85rem;
+  color: var(--text-light);
+  border-top: 1px dashed var(--border);
+  margin-top: 0.4rem;
+}
+
+.summary-payment-row strong {
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.zomato-sheet-payment {
+  background: #F9FAFB;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.65rem 0.75rem;
+  margin-bottom: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+/* Orders Page Payment Pills */
+.payment-pill {
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  font: 700 0.68rem 'Poppins', sans-serif;
+  border: none;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  transition: transform 0.1s ease;
+}
+
+.payment-pill:active {
+  transform: scale(0.95);
+}
+
+.payment-pill.pill-cash {
+  background: #D1FAE5;
+  color: #065F46;
+}
+
+.payment-pill.pill-upi {
+  background: #E0E7FF;
+  color: #3730A3;
+}
+
+.payment-filter-chips {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.pay-chip {
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  font: 600 0.75rem 'Poppins', sans-serif;
+  border: 1px solid var(--border);
+  background: #FFFFFF;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pay-chip.active {
+  background: var(--secondary);
+  color: #FFFFFF;
+  border-color: var(--secondary);
+}
+
+.pay-chip.active-cash {
+  background: #10B981;
+  color: #FFFFFF;
+  border-color: #059669;
+}
+
+.pay-chip.active-upi {
+  background: #6366F1;
+  color: #FFFFFF;
+  border-color: #4F46E5;
+}
+
+/* ==========================================================================
+   FEATURE 3: Order Comments & Instructions
+   ========================================================================== */
+
+.order-notes-section {
+  margin-bottom: 0.75rem;
+}
+
+.order-notes-input {
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font: inherit;
+  font-size: 0.82rem;
+  background: #FFFFFF;
+  color: var(--text);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+.order-notes-input:focus {
+  outline: 2px solid var(--primary);
+  border-color: transparent;
+}
+
+.quick-chips-row {
+  display: flex;
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+  overflow-x: auto;
+  padding-bottom: 0.2rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.quick-chip {
+  padding: 0.22rem 0.55rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  border-radius: 14px;
+  background: #FFF7ED;
+  color: var(--primary-dark);
+  border: 1px solid #FED7AA;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.quick-chip:hover {
+  background: var(--primary);
+  color: #FFFFFF;
+  border-color: var(--primary);
+}
+
+.summary-notes-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  padding: 0.45rem 0.6rem;
+  background: #FEF3C7;
+  border-radius: 8px;
+  margin: 0.4rem 0;
+  font-size: 0.78rem;
+  color: #92400E;
+}
+
+.summary-notes-text {
+  font-weight: 600;
+}
+
+.zomato-sheet-notes {
+  margin-bottom: 0.75rem;
+}
+
+.order-notes-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  padding: 0.5rem 0.75rem;
+  background: #FEF3C7;
+  border: 1px solid #FDE68A;
+  border-radius: 8px;
+  margin: 0.6rem 0;
+  font-size: 0.78rem;
+  color: #92400E;
+}
+
+.notes-box-icon {
+  font-size: 0.9rem;
+}
+
+.notes-box-text {
+  font-weight: 600;
+  word-break: break-word;
+}
+
+/* ==========================================================================
+   Dashboard Financial Tally Card
+   ========================================================================== */
+
+.finance-tally-card {
+  background: linear-gradient(135deg, #1E1B4B 0%, #312E81 100%);
+  border-radius: 18px;
+  padding: 1.25rem;
+  color: #FFFFFF;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 10px 25px rgba(49, 46, 129, 0.25);
+}
+
+.finance-tally-header {
+  margin-bottom: 1rem;
+}
+
+.finance-tally-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #FBBF24;
+}
+
+.finance-tally-subtitle {
+  font-size: 0.8rem;
+  color: #C7D2FE;
+  display: block;
+  margin-top: 0.2rem;
+}
+
+.finance-tally-subtitle strong {
+  color: #FFFFFF;
+  font-size: 0.95rem;
+}
+
+.finance-split-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.finance-split-box {
+  border-radius: 14px;
+  padding: 0.9rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.finance-split-box.box-cash {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.finance-split-box.box-upi {
+  background: rgba(99, 102, 241, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+}
+
+.finance-box-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.35rem;
+}
+
+.finance-box-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.finance-box-badge.badge-cash {
+  color: #6EE7B7;
+}
+
+.finance-box-badge.badge-upi {
+  color: #A5B4FC;
+}
+
+.finance-box-count {
+  font-size: 0.7rem;
+  color: #E0E7FF;
+  opacity: 0.85;
+}
+
+.finance-box-amount {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  line-height: 1.2;
+}
+
+.finance-box-caption {
+  font-size: 0.68rem;
+  color: #C7D2FE;
+  margin-top: 0.2rem;
+}
+
+.finance-ratio-wrap {
+  margin-top: 0.5rem;
+}
+
+.finance-ratio-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.15);
+  overflow: hidden;
+  display: flex;
+}
+
+.finance-bar-segment.segment-cash {
+  background: #10B981;
+  transition: width 0.3s ease;
+}
+
+.finance-bar-segment.segment-upi {
+  background: #818CF8;
+  transition: width 0.3s ease;
+}
+
+.finance-ratio-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: #C7D2FE;
+  margin-top: 0.35rem;
+  font-weight: 500;
+}
+
+.dashboard-filter-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.dashboard-filter-section .filter-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dashboard-filter-pills {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  padding-bottom: 0.2rem;
+}
+
+.dash-filter-pill {
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font: 600 0.75rem 'Poppins', sans-serif;
+  border: 1px solid var(--border);
+  background: #FFFFFF;
+  color: var(--text-light);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.dash-filter-pill.active {
+  background: var(--secondary);
+  color: #FFFFFF;
+  border-color: var(--secondary);
+}
+
+.dash-filter-pill.active-cash {
+  background: #10B981;
+  color: #FFFFFF;
+  border-color: #059669;
+}
+
+.dash-filter-pill.active-upi {
+  background: #6366F1;
+  color: #FFFFFF;
+  border-color: #4F46E5;
+}
+

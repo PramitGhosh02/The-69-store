@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>The 69 Store — Diwali Special Menu Card</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Poppins:wght@400;500;600;700;800&family=Rozha+One&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      width: 1200px;
+      min-height: 1750px;
+      margin: 0 auto;
+      font-family: 'Poppins', sans-serif;
+      background: radial-gradient(circle at 50% 20%, #3d0c1e 0%, #200511 45%, #0f0208 100%);
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Ambient Festive Glows */
+    .glow-top {
+      position: absolute;
+      top: -150px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 900px;
+      height: 450px;
+      background: radial-gradient(ellipse at center, rgba(255, 179, 0, 0.35) 0%, rgba(255, 107, 53, 0.15) 50%, transparent 75%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .glow-bottom {
+      position: absolute;
+      bottom: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 350px;
+      background: radial-gradient(ellipse at center, rgba(255, 107, 53, 0.25) 0%, rgba(217, 83, 79, 0.1) 60%, transparent 80%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Outer Ornate Frame */
+    .outer-frame {
+      position: relative;
+      margin: 28px;
+      padding: 24px;
+      border: 3px solid #d4af37;
+      border-radius: 24px;
+      box-shadow: 0 0 25px rgba(212, 175, 55, 0.4), inset 0 0 25px rgba(212, 175, 55, 0.25);
+      background: rgba(18, 3, 10, 0.85);
+      z-index: 2;
+    }
+
+    .inner-frame {
+      border: 1.5px dashed rgba(243, 198, 93, 0.6);
+      border-radius: 18px;
+      padding: 26px 32px 30px;
+      position: relative;
+    }
+
+    /* Corner Rangoli Ornaments */
+    .corner-ornament {
+      position: absolute;
+      width: 55px;
+      height: 55px;
+      pointer-events: none;
+      z-index: 3;
+    }
+    .top-left { top: 10px; left: 10px; }
+    .top-right { top: 10px; right: 10px; transform: scaleX(-1); }
+    .bottom-left { bottom: 10px; left: 10px; transform: scaleY(-1); }
+    .bottom-right { bottom: 10px; right: 10px; transform: scale(-1); }
+
+    /* Header Section */
+    .header {
+      text-align: center;
+      position: relative;
+      margin-bottom: 24px;
+      padding-bottom: 18px;
+      border-bottom: 2px solid;
+      border-image: linear-gradient(90deg, transparent 5%, #e6ca65 30%, #ffdf79 50%, #e6ca65 70%, transparent 95%) 1;
+    }
+
+    .festive-subtag {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'Cinzel', serif;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 5px;
+      color: #ffd875;
+      text-transform: uppercase;
+      background: rgba(212, 175, 55, 0.15);
+      border: 1px solid rgba(243, 198, 93, 0.4);
+      padding: 6px 24px;
+      border-radius: 30px;
+      margin-bottom: 12px;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+    }
+
+    .brand-title {
+      font-family: 'Cinzel', serif;
+      font-size: 64px;
+      font-weight: 900;
+      letter-spacing: 4px;
+      line-height: 1.05;
+      margin-bottom: 6px;
+      background: linear-gradient(135deg, #FFF6D6 0%, #FFD700 35%, #FFA500 70%, #FF8C00 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 4px 15px rgba(255, 165, 0, 0.5));
+    }
+
+    .brand-tagline {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 21px;
+      color: #f7dca1;
+      letter-spacing: 1.5px;
+    }
+
+    .diwali-diyas {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      margin-top: 10px;
+    }
+
+    .diya-icon {
+      width: 44px;
+      height: 38px;
+      filter: drop-shadow(0 0 10px rgba(255, 174, 0, 0.8));
+    }
+
+    /* Menu Grid Layout (2 Balanced Columns) */
+    .menu-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 26px 32px;
+    }
+
+    /* Category Section Card */
+    .category-card {
+      background: rgba(43, 12, 23, 0.55);
+      border: 1px solid rgba(224, 185, 87, 0.35);
+      border-radius: 16px;
+      padding: 16px 20px 18px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 230, 150, 0.15);
+      position: relative;
+    }
+
+    .category-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1.5px solid rgba(212, 175, 55, 0.35);
+    }
+
+    .category-title {
+      font-family: 'Cinzel', serif;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #ffe699;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-transform: uppercase;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+    }
+
+    .category-badge {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #ffda73;
+      background: rgba(255, 107, 53, 0.25);
+      border: 1px solid rgba(255, 107, 53, 0.5);
+      padding: 3px 10px;
+      border-radius: 12px;
+      text-transform: uppercase;
+    }
+
+    /* Menu Items */
+    .item-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .item-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .item-left {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .veg-dot, .nonveg-dot {
+      width: 15px;
+      height: 15px;
+      border: 1.5px solid;
+      border-radius: 3px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 3px;
+      background: #110207;
+    }
+
+    .veg-dot {
+      border-color: #22c55e;
+    }
+    .veg-dot::after {
+      content: '';
+      width: 7px;
+      height: 7px;
+      background: #22c55e;
+      border-radius: 50%;
+    }
+
+    .nonveg-dot {
+      border-color: #ef4444;
+    }
+    .nonveg-dot::after {
+      content: '';
+      width: 7px;
+      height: 7px;
+      background: #ef4444;
+      border-radius: 50%;
+    }
+
+    .item-name-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .item-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #ffffff;
+      line-height: 1.25;
+    }
+
+    .item-desc {
+      font-size: 12px;
+      color: #c9b68a;
+      margin-top: 1px;
+    }
+
+    .item-dots {
+      flex: 1;
+      border-bottom: 1px dotted rgba(212, 175, 55, 0.35);
+      margin: 0 8px 5px;
+      height: 1px;
+    }
+
+    .item-price {
+      font-family: 'Poppins', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: #ffd54f;
+      white-space: nowrap;
+      text-shadow: 0 0 6px rgba(255, 213, 79, 0.4);
+    }
+
+    .multi-price {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 3px;
+    }
+
+    .multi-price-pill {
+      font-size: 12px;
+      font-weight: 600;
+      color: #fce4a6;
+      background: rgba(255, 215, 0, 0.12);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      padding: 1px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    .multi-price-pill strong {
+      color: #ffd54f;
+      font-size: 14px;
+    }
+
+    /* Challenge & Reward Footer Banner */
+    .challenge-banner {
+      margin-top: 26px;
+      background: linear-gradient(135deg, #5c0f16 0%, #87141f 50%, #5c0f16 100%);
+      border: 2px solid #ffd700;
+      border-radius: 18px;
+      padding: 18px 24px;
+      box-shadow: 0 0 30px rgba(239, 68, 68, 0.4), inset 0 0 20px rgba(255, 215, 0, 0.2);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      gap: 22px;
+    }
+
+    .challenge-banner::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 100%;
+      background: radial-gradient(circle at 10% 50%, rgba(255, 215, 0, 0.25) 0%, transparent 40%),
+                  radial-gradient(circle at 90% 50%, rgba(255, 215, 0, 0.25) 0%, transparent 40%);
+      pointer-events: none;
+    }
+
+    .challenge-badge {
+      background: #ffd700;
+      color: #6b0710;
+      font-family: 'Cinzel', serif;
+      font-size: 15px;
+      font-weight: 900;
+      padding: 12px 18px;
+      border-radius: 14px;
+      text-align: center;
+      line-height: 1.2;
+      flex-shrink: 0;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .challenge-badge span {
+      display: block;
+      font-size: 26px;
+      margin-bottom: 2px;
+    }
+
+    .challenge-text {
+      flex: 1;
+    }
+
+    .challenge-heading {
+      font-family: 'Cinzel', serif;
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff6d6;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .challenge-desc {
+      font-size: 13.5px;
+      color: #ffe3a8;
+      line-height: 1.45;
+      font-weight: 500;
+    }
+
+    .challenge-reward {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 215, 0, 0.6);
+      padding: 3px 12px;
+      border-radius: 20px;
+      margin-top: 6px;
+      font-weight: 700;
+      color: #ffffff;
+      font-size: 13px;
+    }
+
+    .challenge-reward strong {
+      color: #ffd700;
+      font-size: 14px;
+    }
+
+    /* Footer Note */
+    .stall-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(212, 175, 55, 0.3);
+      font-size: 12.5px;
+      color: #d1b880;
+    }
+
+    .stall-chefs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+    }
+
+    .stall-chefs strong {
+      color: #ffd700;
+    }
+
+    .stall-wish {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 14px;
+      color: #ffe8b5;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Glows -->
+  <div class="glow-top"></div>
+  <div class="glow-bottom"></div>
+
+  <div class="outer-frame">
+    <!-- SVG Corner Ornaments -->
+    <svg class="corner-ornament top-left" viewBox="0 0 100 100" fill="none">
+      <path d="M5 5 H95 V25 H25 V95 H5 Z" fill="url(#goldGrad)" opacity="0.85"/>
+      <circle cx="50" cy="50" r="14" fill="none" stroke="url(#goldGrad)" stroke-width="4"/>
+      <circle cx="25" cy="25" r="7" fill="#ffd700"/>
+      <defs>
+        <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#FFF6D6"/>
+          <stop offset="50%" stop-color="#FFD700"/>
+          <stop offset="100%" stop-color="#B8860B"/>
+        </linearGradient>
+      </defs>
+    </svg>
+    <svg class="corner-ornament top-right" viewBox="0 0 100 100" fill="none">
+      <path d="M5 5 H95 V25 H25 V95 H5 Z" fill="url(#goldGrad)" opacity="0.85"/>
+      <circle cx="50" cy="50" r="14" fill="none" stroke="url(#goldGrad)" stroke-width="4"/>
+      <circle cx="25" cy="25" r="7" fill="#ffd700"/>
+    </svg>
+    <svg class="corner-ornament bottom-left" viewBox="0 0 100 100" fill="none">
+      <path d="M5 5 H95 V25 H25 V95 H5 Z" fill="url(#goldGrad)" opacity="0.85"/>
+      <circle cx="50" cy="50" r="14" fill="none" stroke="url(#goldGrad)" stroke-width="4"/>
+      <circle cx="25" cy="25" r="7" fill="#ffd700"/>
+    </svg>
+    <svg class="corner-ornament bottom-right" viewBox="0 0 100 100" fill="none">
+      <path d="M5 5 H95 V25 H25 V95 H5 Z" fill="url(#goldGrad)" opacity="0.85"/>
+      <circle cx="50" cy="50" r="14" fill="none" stroke="url(#goldGrad)" stroke-width="4"/>
+      <circle cx="25" cy="25" r="7" fill="#ffd700"/>
+    </svg>
+
+    <div class="inner-frame">
+
+      <!-- Header -->
+      <header class="header">
+        <div class="festive-subtag">
+          <span>✨</span>
+          <span>Shubh Deepawali Special</span>
+          <span>✨</span>
+        </div>
+        <h1 class="brand-title">THE 69 STORE</h1>
+        <p class="brand-tagline">Fresh, Sizzling & Celebratory Street Food Flavours</p>
+
+        <div class="diwali-diyas">
+          <!-- Diya Left -->
+          <svg class="diya-icon" viewBox="0 0 100 90">
+            <!-- Flame -->
+            <path d="M50 8 C40 24 35 34 50 48 C65 34 60 24 50 8 Z" fill="url(#flameGrad)" />
+            <ellipse cx="50" cy="34" rx="5" ry="9" fill="#FFF7C2" />
+            <!-- Base bowl -->
+            <path d="M15 50 Q50 92 85 50 Q50 62 15 50 Z" fill="url(#diyaBase)" stroke="#ffd700" stroke-width="2"/>
+            <defs>
+              <linearGradient id="flameGrad" x1="0" y1="1" x2="0" y2="0">
+                <stop offset="0%" stop-color="#FF3D00"/>
+                <stop offset="60%" stop-color="#FFB300"/>
+                <stop offset="100%" stop-color="#FFFF8D"/>
+              </linearGradient>
+              <linearGradient id="diyaBase" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#e65100"/>
+                <stop offset="50%" stop-color="#b71c1c"/>
+                <stop offset="100%" stop-color="#ffb300"/>
+              </linearGradient>
+            </defs>
+          </svg>
+
+          <span style="color: #ffd700; letter-spacing: 6px; font-size: 18px;">✦ ✦ ✦</span>
+
+          <!-- Diya Right -->
+          <svg class="diya-icon" viewBox="0 0 100 90">
+            <path d="M50 8 C40 24 35 34 50 48 C65 34 60 24 50 8 Z" fill="url(#flameGrad)" />
+            <ellipse cx="50" cy="34" rx="5" ry="9" fill="#FFF7C2" />
+            <path d="M15 50 Q50 92 85 50 Q50 62 15 50 Z" fill="url(#diyaBase)" stroke="#ffd700" stroke-width="2"/>
+          </svg>
+        </div>
+      </header>
+
+      <!-- Menu Grid -->
+      <main class="menu-grid">
+
+        <!-- 1. SIZZLING ROLLS -->
+        <section class="category-card">
+          <div class="category-header">
+            <h2 class="category-title">🌯 Sizzling Rolls</h2>
+            <span class="category-badge">Chef's Special</span>
+          </div>
+          <div class="item-list">
+            <div class="item-row">
+              <div class="item-left">
+                <span class="nonveg-dot"></span>
+                <div class="item-name-group">
+                  <span class="item-name">Kolkata Egg Roll</span>
+                  <span class="item-desc">Crisp paratha with spiced egg & onion crunch</span>
+                </div>
+              </div>
+              <div class="item-dots"></div>
+              <span class="item-price">₹49</span>
+            </div>
+
+            <div class="item-row">
+              <div class="item-left">
+                <span class="nonveg-dot"></span>
+                <div class="item-name-group">
+                  <span class="item-name">Double Egg Roll</span>
+                  <span class="item-desc">Double egg goodness, lemon & zesty herbs</span>
+                </div>
+              </div>
+              <div class="item-dots"></div>
+              <span class="item-price">₹59</span>
+            </div>
+
+            <div class="item-row">
+              <div class="item-left">
+                <span class="nonveg-dot"></span>
+                <div class="item-name-group">
+                  <span class="item-name">Egg Chicken Roll</span>
+                  <span class="item-desc">Tender spiced chicken chunks + fluffy egg wrap</span>
+                </div>
+              </div>
+              <div class="item-dots"></div>
+              <span class="item-price">₹69</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. CRISPY CUTLETS -->
+        <section class="category-card">
+          <div class="category-header">
+            <h2 class="category-title">🥘 Crispy Cutlets</h2>
+            <span class="category-badge">3 Pcs Portion</span>
+          </div>
+          <div class="item-list">
+            <div class="item-row">
+              <div class="item-left">
+                <span class="veg-dot"></span>
+                <div class="item-name-group">
+                  <span class="item-name">Crispy Veg Cutlets</span>
+                  <span class="item-desc">Beetroot, potato & secret spices (3 pcs)</span>
+                </div>
+              </div>
+              <div class="item-dots"></div>
+              <span class="item-price">₹49</span>
+            </div>
+
+            <div class="item-row">
+              <div class="item-left">
+                <span class="veg-dot"></span>
+                <div class="item-name-group">
+                  <span class="item-name">Rich Paneer Cutlets</span>
+                  <span class="item-desc">Golden crumb-coated spiced cottage cheese (3 pcs)</span>
+                </div>
+              </div>
+              <div class="item-dots"></div>
+              <span class="item-price">₹59</span>
+            </div>
+
+            <div class="item-row">
+              <div class="item-left">
+                <span class="nonveg-dot"></span>
+                <div class="item-name-group">
+                  <span class="item-name">Desi Chicken Cutlets</span>
+                  <span class="item-desc">Minced chicken patties, fried crisp (3 pcs)</span>
+                </div>
+              </div>
+              <div class="item-dots"></div>
+              <span class="item-price">₹69</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. DIWALI SPECIAL SAMOSAS -->
+        <section class="category-card">
+          <div class="category-header">
+            <h2 class="category-title">🔺 Samosa Junction</h2>
+            <span class="category-badge">Crisp & Hot</span>
+          </div>
+          <div class="item-list">
+            <div class="item-row">
+              <div class="item-left">
+                <span class="veg-dot"></span>
+                <div class="item-name-group">
+                  <span class="item-name">Crispy Plain Samosa</span>
+                  <span class="item-desc">Classic spiced aloo filling with mint chutney (1 pc)</span>
+                </div>
+              </div>
+              <div class="item-dots"></div>
+              <span class="item-price">₹25</span>
+            </div>
+
+            <div class="item-row">
+              <div class="item-left">
+                <span class="veg-dot"></span>
+                <div class="item-name-group">
+                  <span class="item-name">Pair Plate Samosa</span>
+                  <span class="item-desc">Two hot samosas served with sweet & spicy dip (2 pcs)</span>
+                </div>
+              </div>
+              <div class="item-dots"></div>
+              <span class="item-price">₹48</span>
+            </div>
+
+            <div class="item-row">
+              <div class="item-left">
+                <span class="veg-dot"></span>
+                <div class="item-name-group">
+                  <span class="item-name">Dahi Samosa Chaat</span>
+                  <span class="item-desc">Crushed samosas, chilled curd, tamarind & sev (2 pcs)</span>
+                </div>
+              </div>
+              <div class="item-dots"></div>
+              <span class="item-price">₹50</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. TOASTED SANDWICHES -->
+        <section class="category-card">
+          <div class="category-header">
+            <h2 class="category-title">🥪 Grill Sandwiches</h2>
+            <span class="category-badge">Butter Toasted</span>
+          </div>
+          <div class="item-list">
+            <div class="item-row">
+              <div class="item-left">
+                <span class="veg-dot"></span>
+                <div class="item-name-group">
+                  <span class="item-name">Garden Veg Sandwich</span>
+                  <span class="item-desc">Cucumber, tomato, bell pepper & green chutney</span>
+                </div>
+              </div>
+              <div class="item-dots"></div>
+              <div class="multi-price">
+                <span class="multi-price-pill">No Cheese <strong>₹39</strong></span>
+                <span class="multi-price-pill">With Cheese <strong>₹49</strong></span>
+              </div>
+            </div>
+
+            <div class="item-row">
+              <div class="item-left">
+                <span class="veg-dot"></span>
+                <div class="item-name-group">
+                  <span class="item-name">Paneer Tikka Sandwich</span>
+                  <span class="item-desc">Marinated paneer slices grilled golden</span>
+                </div>
+              </div>
+              <div class="item-dots"></div>
+              <div class="multi-price">
+                <span class="multi-price-pill">No Cheese <strong>₹59</strong></span>
+                <span class="multi-price-pill">With Cheese <strong>₹69</strong></span>
+              </div>
+            </div>
+
+            <div class="item-row">
+              <div class="item-left">
+                <span class="nonveg-dot"></span>
+                <div class="item-name-group">
+                  <span class="item-name">Smoky Chicken Sandwich</span>
+                  <span class="item-desc">Juicy shredded chicken in creamy masala spread</span>
+                </div>
+              </div>
+              <div class="item-dots"></div>
+              <div class="multi-price">
+                <span class="multi-price-pill">No Cheese <strong>₹59</strong></span>
+                <span class="multi-price-pill">With Cheese <strong>₹69</strong></span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. TIKKA KEBABS -->
+        <section class="category-card">
+          <div class="category-header">
+            <h2 class="category-title">🍢 Tandoori Kebabs</h2>
+            <span class="category-badge">Charcoal Flame</span>
+          </div>
+          <div class="item-list">
+            <div class="item-row">
+              <div class="item-left">
+                <span class="nonveg-dot"></span>
+                <div class="item-name-group">
+                  <span class="item-name">Chicken Tikka Kebabs</span>
+                  <span class="item-desc">Smoky marinated boneless chicken skewers with onion rings & lemon (3 pcs)</span>
+                </div>
+              </div>
+              <div class="item-dots"></div>
+              <span class="item-price">₹69</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. COLD BEVERAGES & LASSI -->
+        <section class="category-card">
+          <div class="category-header">
+            <h2 class="category-title">🥛 Sips & Shakes</h2>
+            <span class="category-badge">Chilled</span>
+          </div>
+          <div class="item-list">
+            <div class="item-row">
+              <div class="item-left">
+                <span class="veg-dot"></span>
+                <div class="item-name-group">
+                  <span class="item-name">Classic Cold Coffee</span>
+                  <span class="item-desc">Frothy rich blend • Optional Ice Cream Scoop included</span>
+                </div>
+              </div>
+              <div class="item-dots"></div>
+              <span class="item-price">₹49</span>
+            </div>
+
+            <div class="item-row">
+              <div class="item-left">
+                <span class="veg-dot"></span>
+                <div class="item-name-group">
+                  <span class="item-name">Chatpate Masala Lassi</span>
+                  <span class="item-desc">Thick churned spiced yogurt with roasted cumin</span>
+                </div>
+              </div>
+              <div class="item-dots"></div>
+              <span class="item-price">₹39</span>
+            </div>
+
+            <div class="item-row">
+              <div class="item-left">
+                <span class="veg-dot"></span>
+                <div class="item-name-group">
+                  <span class="item-name">Royal Rose Lassi</span>
+                  <span class="item-desc">Fragrant rose petal essence, chilled creamy curd</span>
+                </div>
+              </div>
+              <div class="item-dots"></div>
+              <span class="item-price">₹39</span>
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- Challenge & Reward Banner -->
+      <div class="challenge-banner">
+        <div class="challenge-badge">
+          <span>🌶️🔥</span>
+          Diwali<br>Challenge
+        </div>
+        <div class="challenge-text">
+          <div class="challenge-heading">
+            <span>THE 69 SPICY DIWALI CHALLENGE!</span>
+            <span>⚡</span>
+          </div>
+          <p class="challenge-desc">
+            Can you handle true Diwali fire? Order any of our <strong>Extra Spicy Rolls</strong> (at the same regular price) and finish the entire roll <strong>without taking a single sip of water</strong>!
+          </p>
+          <div class="challenge-reward">
+            <span>🎁 SURVIVE THE SPICE:</span>
+            <strong>Win a FREE Delicious Chocolate Bar! 🍫✨</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stall Footer -->
+      <footer class="stall-footer">
+        <div class="stall-chefs">
+          <span>👨‍🍳 Stall Hosts:</span>
+          <strong>Pramit • Sohana • Sumedh</strong>
+        </div>
+        <div class="stall-wish">
+          🪔 Wishing You a Joyous & Prosperous Diwali! 🪔
+        </div>
+      </footer>
+
+    </div>
+  </div>
+
+</body>
+</html>

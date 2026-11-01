@@ -3,6 +3,58 @@ import { createClient } from '@supabase/supabase-js';
 const STORAGE_KEY = 'the69store_orders';
 const COUNTER_KEY = 'the69store_last_order_num';
 const SUPABASE_CONFIG_KEY = 'the69store_supabase_config';
+const OUT_OF_STOCK_KEY = 'the69store_out_of_stock';
+
+// Out of stock storage helpers
+export function loadLocalOutOfStock() {
+  try {
+    const raw = localStorage.getItem(OUT_OF_STOCK_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveLocalOutOfStock(itemIds) {
+  try {
+    localStorage.setItem(OUT_OF_STOCK_KEY, JSON.stringify(itemIds));
+  } catch {}
+}
+
+export async function loadOutOfStock() {
+  if (cloudDatabaseEnabled && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('payload')
+        .eq('id', '___config_out_of_stock___')
+        .single();
+      if (!error && data?.payload?.itemIds) {
+        saveLocalOutOfStock(data.payload.itemIds);
+        return data.payload.itemIds;
+      }
+    } catch (e) {
+      console.warn('Could not load stock from cloud:', e);
+    }
+  }
+  return loadLocalOutOfStock();
+}
+
+export async function saveOutOfStock(itemIds) {
+  saveLocalOutOfStock(itemIds);
+  if (cloudDatabaseEnabled && supabase) {
+    try {
+      await supabase.from('orders').upsert({
+        id: '___config_out_of_stock___',
+        payload: { type: 'out_of_stock', itemIds, updatedAt: new Date().toISOString() },
+      });
+    } catch (err) {
+      console.warn('Could not sync stock to cloud:', err);
+    }
+  }
+  window.dispatchEvent(new CustomEvent('the69store:stock_updated', { detail: itemIds }));
+  return itemIds;
+}
 
 // 1. Check environment variables
 const ENV_SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL?.replace(/\/$/, '');
@@ -71,12 +123,25 @@ export async function loadOrders() {
   try {
     const { data, error } = await supabase
       .from('orders')
-      .select('payload')
+      .select('id, payload')
       .order('created_at', { ascending: false });
 
     if (error) throw error;
 
-    const cloudOrders = (data || []).map((row) => row.payload);
+    // Check if cloud has stock config and sync it
+    const stockRow = (data || []).find((row) => row.id === '___config_out_of_stock___');
+    if (stockRow?.payload?.itemIds) {
+      saveLocalOutOfStock(stockRow.payload.itemIds);
+      window.dispatchEvent(
+        new CustomEvent('the69store:stock_updated', { detail: stockRow.payload.itemIds })
+      );
+    }
+
+    // Filter out config rows and keep only real orders
+    const cloudOrders = (data || [])
+      .filter((row) => row.id && !row.id.startsWith('___') && row.payload && Array.isArray(row.payload.items))
+      .map((row) => row.payload);
+
     // Keep local storage synchronized as an offline cache
     saveLocalOrders(cloudOrders);
     return cloudOrders;
@@ -187,7 +252,7 @@ export async function clearAllOrders() {
 
   if (cloudDatabaseEnabled && supabase) {
     try {
-      await supabase.from('orders').delete().neq('id', '___non_existent___');
+      await supabase.from('orders').delete().not('id', 'like', '___%');
     } catch (err) {
       console.warn('Supabase clearAllOrders error:', err);
     }
@@ -260,6 +325,8 @@ export function exportOrdersCSV(orders) {
     'Time',
     'Created By',
     'Customer',
+    'Payment Method',
+    'Notes / Instructions',
     'Item',
     'Option',
     'Qty',
@@ -278,6 +345,8 @@ export function exportOrdersCSV(orders) {
       minute: '2-digit',
       hour12: true,
     });
+    const payment = (order.paymentMethod || 'cash').toUpperCase();
+    const notes = order.notes || '';
 
     order.items.forEach((item) => {
       rows.push([
@@ -286,6 +355,8 @@ export function exportOrdersCSV(orders) {
         time,
         order.createdBy,
         order.customerName || 'Walk-in',
+        payment,
+        notes,
         item.name,
         item.option || '—',
         item.qty,
